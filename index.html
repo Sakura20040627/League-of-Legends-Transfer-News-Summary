@@ -253,8 +253,15 @@ function markStats(){
     el.classList.toggle("on", el.dataset.f === feedFilter);
   });
 }
+function hasDestinationRumor(playerId){
+  return DATA.transfers.some(t => t.playerId === playerId && (t.toTeam || t.toTeamExt)
+    && t.credStatus !== "REFUTED" && t.outcome !== "debunked");
+}
+function freeAgentList(){
+  return DATA.players.filter(p => p.status === "free_agent" && !hasDestinationRumor(p.id));
+}
 function freeAgentsView(){
-  const list = DATA.players.filter(p => p.status === "free_agent");
+  const list = freeAgentList();
   const rows = list.map(p =>
     '<div class="row" style="cursor:default;">'
     + teamBadge(p.baseTeam, p.baseTeam)
@@ -288,7 +295,7 @@ fetch("data.json").then(r => r.json()).then(d => {
   document.getElementById("stats").innerHTML =
     '<span class="stat act" data-f="confirmed" onclick="setFilter(\'confirmed\')">已確認 <b>'+(s.confirmedCount ?? "—")+'</b></span>'
     + '<span class="stat act" data-f="rumor" onclick="setFilter(\'rumor\')">傳聞 <b>'+(s.rumorCount ?? "—")+'</b></span>'
-    + '<span class="stat act" data-f="fa" onclick="location.hash=\'#/freeagents\'">自由球員 <b>'+(s.freeAgentCount ?? "—")+'</b></span>'
+    + '<span class="stat act" data-f="fa" onclick="location.hash=\'#/freeagents\'">自由球員 <b>'+freeAgentList().length+'</b></span>'
     + '<span class="stat act" data-f="teams" onclick="location.hash=\'#/teams\'">監控戰隊 <b>'+d.teams.length+'</b></span>'
     + '<span class="stat">最後更新 <b>'+esc(upd)+'</b></span>';
   window.addEventListener("hashchange", render);
