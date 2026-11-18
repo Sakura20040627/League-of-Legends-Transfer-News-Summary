@@ -4,73 +4,92 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>英雄聯盟轉會追蹤｜公開鏡像</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0B0D10; --surface:#14171C; --surface2:#1A1E24; --border:#292D34;
-    --text:#E8EAED; --muted:#9AA3AD; --accent:#83B3DA;
-    --green:#86C9A4; --amber:#D3AF72; --red:#E08A8A; --grey:#7A828B;
+    --bg:#09090B; --surface:#121215; --hover:#17171B; --track:#141417;
+    --border:rgba(255,255,255,.07); --border-hi:rgba(255,255,255,.14);
+    --text:#F4F4F5; --muted:#8E8E93; --faint:#71717A; --ghost:#5C5A54;
+    --green:#34D399; --blue:#60A5FA; --amber:#F59E0B; --red:#F87171;
+    --ease:cubic-bezier(0.22,1,0.36,1);
+    --shadow:inset 0 1px 0 0 rgba(255,255,255,.06), 0 4px 16px -4px rgba(0,0,0,.5);
+    --mono:"JetBrains Mono","Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{background:var(--bg); color:var(--text); font-family:Inter,"Noto Sans SC",system-ui,sans-serif; -webkit-font-smoothing:antialiased;}
-  a{color:var(--accent); text-decoration:none;}
-  .wrap{max-width:860px; margin:0 auto; padding:20px 16px 64px;}
-  header.top{padding:8px 0 16px; border-bottom:1px solid var(--border); margin-bottom:16px;}
-  h1{font-size:22px; font-weight:700; letter-spacing:.02em;}
-  .sub{color:var(--muted); font-size:13px; margin-top:4px;}
-  .stats{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
-  .stat{background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-size:12.5px; color:var(--muted);}
-  .stat b{color:var(--text); font-weight:600;}
+  body{background:var(--bg); color:var(--text); font-family:Inter,"Noto Sans TC","PingFang TC","Microsoft YaHei",system-ui,sans-serif; -webkit-font-smoothing:antialiased;}
+  body::before{content:""; position:fixed; inset:0; pointer-events:none; opacity:.02; z-index:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");}
+  a{color:var(--blue); text-decoration:none;}
+  .wrap{max-width:896px; margin:0 auto; padding:28px 16px 64px; position:relative; z-index:1;}
+  header.top{padding:4px 0 18px;}
+  h1{font-size:22px; font-weight:700; letter-spacing:-.02em; color:var(--text);}
+  .sub{color:var(--faint); font-size:13px; margin-top:5px;}
+  .stats{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
+  .stat{background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:999px; padding:5px 11px; font-size:12.5px; color:var(--muted); transition:border-color .3s var(--ease), color .3s var(--ease);}
+  .stat b{color:var(--text); font-weight:600; font-family:var(--mono); font-variant-numeric:tabular-nums;}
   .stat.act{cursor:pointer;}
-  .stat.act:hover{border-color:var(--accent);}
-  .stat.act.on{border-color:var(--accent); color:var(--text);}
-  .filterbar{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px; color:var(--muted);}
-  .filterbar a{cursor:pointer;}
-  nav.tabs{display:flex; gap:8px; margin:16px 0;}
-  nav.tabs a{padding:8px 18px; border-radius:999px; border:1px solid var(--border); color:var(--muted); font-size:14px; font-weight:500;}
-  nav.tabs a.on{background:var(--accent); border-color:var(--accent); color:#0B0D10; font-weight:600;}
-  .row{display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:8px; cursor:pointer;}
-  .row:hover{background:var(--surface2);}
-  .row .main{flex:1; min-width:0;}
-  .pname{font-size:15.5px; font-weight:600;}
+  .stat.act:hover{border-color:var(--border-hi);}
+  .stat.act.on{border-color:var(--border-hi); color:var(--text);}
+  nav.tabs{position:relative; display:inline-flex; gap:2px; background:var(--track); border:1px solid var(--border); border-radius:999px; padding:4px; margin:18px 0 20px;}
+  nav.tabs .pill{position:absolute; top:4px; bottom:4px; border-radius:999px; background:#F4F4F5; transition:left .45s var(--ease), width .45s var(--ease), opacity .3s var(--ease); opacity:0;}
+  nav.tabs a{position:relative; z-index:1; padding:7px 20px; border-radius:999px; color:var(--muted); font-size:14px; font-weight:500; transition:color .3s var(--ease);}
+  nav.tabs a.on{color:#09090B; font-weight:600;}
+  .card{display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); padding:12px 14px; margin-bottom:10px; cursor:pointer; transition:background .35s var(--ease), border-color .35s var(--ease), transform .35s var(--ease);}
+  .card:hover{background:var(--hover); border-color:var(--border-hi); transform:translateY(-1px);}
+  .card.static{cursor:default;}
+  .card.static:hover{background:var(--surface); border-color:var(--border); transform:none;}
+  .card .main{flex:1; min-width:0;}
+  .pname{font-size:15.5px; font-weight:600; color:var(--text);}
   .move{color:var(--muted); font-size:13px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .date{color:var(--grey); font-size:12px; white-space:nowrap;}
-  .badge{position:relative; width:40px; height:40px; flex:0 0 40px; border-radius:9px; background:#E9EBEE; color:#33383F; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; overflow:hidden;}
-  .badge img{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:3px;}
+  .move b{color:#D4D4D8; font-weight:500;}
+  .date{color:var(--faint); font-size:12px; white-space:nowrap; font-family:var(--mono); font-variant-numeric:tabular-nums;}
+  .badge{position:relative; width:38px; height:38px; flex:0 0 38px; border-radius:8px; background:#F4F3EF; color:#33383F; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; overflow:hidden; border:1px solid rgba(255,255,255,.14); box-shadow:inset 0 1px 3px rgba(0,0,0,.12);}
+  .badge img{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:5px;}
   .badge:has(> img) .txt{display:none;}
-  .badge.lg{width:56px; height:56px; flex-basis:56px; font-size:14px; border-radius:12px;}
+  .badge.lg{width:52px; height:52px; flex-basis:52px; font-size:14px; border-radius:10px;}
   .chip{display:inline-block; padding:2.5px 9px; border-radius:999px; font-size:11.5px; font-weight:600; white-space:nowrap; border:1px solid transparent;}
-  .st-green{color:var(--green); border-color:rgba(134,201,164,.4); background:rgba(134,201,164,.08);}
-  .st-amber{color:var(--amber); border-color:rgba(211,175,114,.4); background:rgba(211,175,114,.08);}
-  .st-red{color:var(--red); border-color:rgba(224,138,138,.4); background:rgba(224,138,138,.08);}
-  .st-blue{color:var(--accent); border-color:rgba(131,179,218,.4); background:rgba(131,179,218,.08);}
-  .st-grey{color:var(--grey); border-color:rgba(122,130,139,.35); background:rgba(122,130,139,.07);}
-  .region{font-size:13px; font-weight:700; color:var(--muted); letter-spacing:.14em; margin:20px 0 8px;}
+  .st-green{color:var(--green); border-color:rgba(52,211,153,.25); background:rgba(52,211,153,.10);}
+  .st-amber{color:var(--amber); border-color:rgba(245,158,11,.25); background:rgba(245,158,11,.10);}
+  .st-red{color:var(--red); border-color:rgba(248,113,113,.25); background:rgba(248,113,113,.10);}
+  .st-blue{color:var(--blue); border-color:rgba(96,165,250,.25); background:rgba(96,165,250,.08);}
+  .st-grey{color:var(--muted); border-color:var(--border); background:rgba(255,255,255,.04);}
+  .dot{display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:7px; vertical-align:1px;}
+  .dot.g{background:var(--green);} .dot.a{background:var(--amber);} .dot.b{background:var(--blue);} .dot.r{background:var(--red);} .dot.gr{background:var(--ghost);}
+  .dayhead{font-size:12px; font-weight:500; color:var(--faint); letter-spacing:.08em; margin:24px 0 10px; font-family:var(--mono); font-variant-numeric:tabular-nums;}
+  .dayhead:first-child{margin-top:2px;}
+  .region{display:flex; align-items:baseline; justify-content:space-between; font-size:13px; font-weight:700; color:var(--text); letter-spacing:.14em; margin:26px 0 10px; font-family:var(--mono);}
   .region:first-child{margin-top:4px;}
+  .region .cnt{color:var(--faint); font-size:12px; font-weight:500; letter-spacing:.05em;}
   .tname{font-size:15px; font-weight:600;}
-  .tcode{color:var(--grey); font-size:12px; margin-left:6px;}
-  .card{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px;}
-  .card h2{font-size:17px; margin-bottom:6px;}
-  .card p{font-size:14.5px; line-height:1.75; color:#D5D9DE; white-space:pre-wrap;}
-  .card .lbl{font-size:12px; color:var(--grey); letter-spacing:.1em; margin:14px 0 4px;}
-  .back{display:inline-block; margin-bottom:14px; font-size:14px;}
+  .tcode{color:var(--faint); font-size:12px; margin-left:6px; font-family:var(--mono);}
+  .tsum{color:var(--muted); font-size:12.5px; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .arrow{color:var(--ghost); font-size:16px; flex:0 0 auto;}
+  .panel{background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow); padding:20px; margin-bottom:12px;}
+  .panel h2{font-size:19px; letter-spacing:-.01em;}
+  .panel p{font-size:14.5px; line-height:1.75; color:#D5D9DE; white-space:pre-wrap;}
+  .panel .lbl{font-size:11px; color:var(--faint); letter-spacing:.12em; margin:16px 0 4px; font-family:var(--mono); text-transform:uppercase;}
+  .back{display:inline-block; margin-bottom:14px; font-size:14px; color:var(--muted);}
+  .back:hover{color:var(--text);}
   table.roster{width:100%; border-collapse:collapse; font-size:13px; table-layout:fixed;}
-  table.roster th, table.roster td{padding:9px 6px; border-bottom:1px solid var(--border); text-align:left; vertical-align:middle;}
+  table.roster th, table.roster td{padding:9px 6px; border-bottom:1px solid rgba(255,255,255,.06); text-align:left; vertical-align:middle;}
   table.roster th:nth-child(1), table.roster td:nth-child(1){width:19%;}
   table.roster th:nth-child(2), table.roster td:nth-child(2){width:26%;}
   table.roster th:nth-child(3), table.roster td:nth-child(3){width:26%;}
   table.roster th:nth-child(4), table.roster td:nth-child(4){width:29%;}
   table.roster td{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   table.roster .chip{font-size:11px; padding:2px 7px;}
-  table.roster th{color:var(--grey); font-size:12px; letter-spacing:.08em; font-weight:600;}
+  table.roster th{color:var(--faint); font-size:11px; letter-spacing:.1em; font-weight:600; font-family:var(--mono); text-transform:uppercase;}
   table.roster tr:last-child td{border-bottom:none;}
-  .role{color:var(--muted); font-size:12.5px; font-weight:600; letter-spacing:.05em; white-space:nowrap;}
+  .role{color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.05em; white-space:nowrap; font-family:var(--mono);}
   tr.sub td{opacity:.62; font-size:13px;}
   .tag-sub{font-size:10.5px; border:1px solid var(--border); border-radius:4px; padding:1px 5px; color:var(--muted); margin-left:6px;}
   .gone{color:var(--red);}
-  footer{color:var(--grey); font-size:12px; line-height:1.7; margin-top:28px; border-top:1px solid var(--border); padding-top:14px;}
+  .filterbar{display:flex; align-items:center; gap:10px; margin-bottom:14px; font-size:13px; color:var(--muted);}
+  .filterbar a{cursor:pointer; color:var(--blue);}
+  footer{color:var(--ghost); font-size:12px; line-height:1.7; margin-top:30px; border-top:1px solid var(--border); padding-top:14px;}
   .empty{color:var(--muted); padding:32px 0; text-align:center; font-size:14px;}
+  @keyframes rise{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  .rise{animation:rise .5s var(--ease) both;}
+  @media (prefers-reduced-motion: reduce){ .rise{animation:none;} *{transition:none !important;} }
 </style>
 </head>
 <body>
@@ -81,6 +100,7 @@
     <div class="stats" id="stats"></div>
   </header>
   <nav class="tabs" id="tabs">
+    <span class="pill" id="tabPill"></span>
     <a href="#/" data-tab="feed">動態</a>
     <a href="#/teams" data-tab="teams">戰隊</a>
   </nav>
@@ -110,13 +130,13 @@ function teamBadge(code, ext, lg){
   return badge(null, (ext||code||"?").slice(0,4), lg);
 }
 function transferStatus(t){
-  if(t.credStatus==="REFUTED" || t.outcome==="debunked") return {label:"已證偽", cls:"st-red"};
-  if(t.credStatus==="OFFICIAL") return {label:"官方確認", cls:"st-green"};
-  if(t.outcome==="confirmed") return {label:"已確認", cls:"st-green"};
-  if(t.credStatus==="REPORTED" || t.tier==="REPORTED") return {label:"媒體報道", cls:"st-blue"};
-  if(t.credStatus==="RUMOR" || t.tier==="RUMOR") return {label:"傳聞", cls:"st-amber"};
-  if(t.outcome==="unverifiable") return {label:"無法核實", cls:"st-grey"};
-  return {label:"待核實", cls:"st-grey"};
+  if(t.credStatus==="REFUTED" || t.outcome==="debunked") return {label:"已證偽", cls:"st-red", dot:"r"};
+  if(t.credStatus==="OFFICIAL") return {label:"官方確認", cls:"st-green", dot:"g"};
+  if(t.outcome==="confirmed") return {label:"已確認", cls:"st-green", dot:"g"};
+  if(t.credStatus==="REPORTED" || t.tier==="REPORTED") return {label:"媒體報道", cls:"st-blue", dot:"b"};
+  if(t.credStatus==="RUMOR" || t.tier==="RUMOR") return {label:"傳聞", cls:"st-amber", dot:"a"};
+  if(t.outcome==="unverifiable") return {label:"無法核實", cls:"st-grey", dot:"gr"};
+  return {label:"待核實", cls:"st-grey", dot:"gr"};
 }
 function moveText(t){
   const from = t.fromTeam || t.fromTeamExt || "";
@@ -128,36 +148,57 @@ function moveText(t){
   return (from || "") + (to ? " → "+to : "");
 }
 function primaryTeam(t){ return t.toTeam ? {code:t.toTeam} : {code:t.fromTeam, ext:t.fromTeamExt}; }
+function delay(i){ return ' style="animation-delay:'+(Math.min(i,12)*25)+'ms"'; }
+function dayLabel(dstr){
+  if(!dstr) return "日期未定";
+  const m = dstr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(!m) return dstr;
+  return Number(m[2])+"月"+Number(m[3])+"日";
+}
+function shortDate(dstr){
+  if(!dstr) return "";
+  const m = dstr.match(/^\d{4}-(\d{2})-(\d{2})/);
+  return m ? m[1]+"-"+m[2] : dstr;
+}
+function transferCard(t, i){
+  const st = transferStatus(t), pt = primaryTeam(t);
+  return '<div class="card rise"'+delay(i)+' onclick="location.hash=\'#/transfer/'+t.id+'\'">'
+    + teamBadge(pt.code, pt.ext)
+    + '<div class="main"><div class="pname">'+esc(pname(t.playerId))+'</div>'
+    + '<div class="move">'+esc(moveText(t))+'</div></div>'
+    + '<span class="chip '+st.cls+'">'+st.label+'</span>'
+    + '<span class="date">'+esc(shortDate(t.announcedDate || ""))+'</span></div>';
+}
 
 function feedView(){
   let list = DATA.transfers;
   if(feedFilter === "confirmed") list = list.filter(t => transferStatus(t).cls === "st-green");
   else if(feedFilter === "rumor") list = list.filter(t => transferStatus(t).cls !== "st-green");
   const bar = feedFilter === "all" ? "" : '<div class="filterbar"><span>篩選：'+(feedFilter === "confirmed" ? "已確認" : "傳聞")+'（'+list.length+' 條）</span><a onclick="clearFilter()">✕ 顯示全部</a></div>';
-  const rows = list.map(t => {
-    const st = transferStatus(t), pt = primaryTeam(t);
-    return '<div class="row" onclick="location.hash=\'#/transfer/'+t.id+'\'">'
-      + teamBadge(pt.code, pt.ext)
-      + '<div class="main"><div class="pname">'+esc(pname(t.playerId))+'</div>'
-      + '<div class="move">'+esc(moveText(t))+'</div></div>'
-      + '<span class="chip '+st.cls+'">'+st.label+'</span>'
-      + '<span class="date">'+esc(t.announcedDate || "")+'</span></div>';
-  }).join("");
-  return bar + (rows || '<div class="empty">暫無記錄</div>');
+  let html = "", lastDay = null, i = 0;
+  for(const t of list){
+    const dl = dayLabel(t.announcedDate || "");
+    if(dl !== lastDay){ html += '<div class="dayhead">'+esc(dl)+'</div>'; lastDay = dl; }
+    html += transferCard(t, i++);
+  }
+  return bar + (html || '<div class="empty">暫無記錄</div>');
 }
 
 function teamsView(){
-  let html = "";
+  let html = "", i = 0;
   for(const region of REGION_ORDER){
     const teams = DATA.teams.filter(t => t.region === region);
     if(!teams.length) continue;
-    html += '<div class="region">'+region+'</div>';
-    html += teams.map(t =>
-      '<div class="row" onclick="location.hash=\'#/team/'+t.code+'\'">'
-      + badge(t.code, t.code)
-      + '<div class="main"><span class="tname">'+esc(t.name)+'</span><span class="tcode">'+esc(t.code)+'</span></div>'
-      + '<span class="date">'+region+'</span></div>'
-    ).join("");
+    html += '<div class="region"><span>'+region+'</span><span class="cnt">'+teams.length+' 支戰隊</span></div>';
+    html += teams.map(t => {
+      const rel = DATA.transfers.filter(x => x.fromTeam===t.code || x.toTeam===t.code);
+      const sum = rel.length ? '<div class="tsum"><span class="dot '+transferStatus(rel[0]).dot+'"></span>'+esc(pname(rel[0].playerId))+' '+esc(moveText(rel[0]))+'</div>' : "";
+      return '<div class="card rise"'+delay(i++)+' onclick="location.hash=\'#/team/'+t.code+'\'">'
+        + badge(t.code, t.code)
+        + '<div class="main"><div><span class="tname">'+esc(t.name)+'</span><span class="tcode">'+esc(t.code)+'</span></div>'
+        + sum + '</div>'
+        + '<span class="arrow">›</span></div>';
+    }).join("");
   }
   return html;
 }
@@ -195,7 +236,7 @@ function teamView(code){
     else if(s27[role] != null) next = s27[role];
     else if(o && o.showIncumbent) next = inc;
     else if(o && (kind==="departed" || kind==="leaving_reported" || kind==="leaving_rumor")) next = inc;
-    const nextHtml = next == null ? '<span style="color:var(--grey)">—</span>'
+    const nextHtml = next == null ? '<span style="color:var(--ghost)">—</span>'
       : '<span class="'+(kind==="departed" ? "gone" : "")+'">'+esc(pname(next))+'</span>';
     rows += '<tr><td class="role">'+role+'</td><td>'+esc(inc==null?"—":pname(inc))+'</td><td>'+nextHtml+'</td>'
       + '<td><span class="chip '+meta.cls+'">'+meta.label+'</span></td></tr>';
@@ -209,23 +250,15 @@ function teamView(code){
       + '<td><span class="chip '+meta.cls+'">'+meta.label+'</span></td></tr>';
   }
   const rel = DATA.transfers.filter(t => t.fromTeam===code || t.toTeam===code);
-  const relHtml = rel.length ? rel.map(t => {
-    const st = transferStatus(t), pt = primaryTeam(t);
-    return '<div class="row" onclick="location.hash=\'#/transfer/'+t.id+'\'">'
-      + teamBadge(pt.code, pt.ext)
-      + '<div class="main"><div class="pname">'+esc(pname(t.playerId))+'</div>'
-      + '<div class="move">'+esc(moveText(t))+'</div></div>'
-      + '<span class="chip '+st.cls+'">'+st.label+'</span>'
-      + '<span class="date">'+esc(t.announcedDate || "")+'</span></div>';
-  }).join("") : '<div class="empty">暫無相關記錄</div>';
+  const relHtml = rel.length ? rel.map((t, i) => transferCard(t, i)).join("") : '<div class="empty">暫無相關記錄</div>';
   return '<a class="back" href="#/teams">← 返回戰隊列表</a>'
-    + '<div class="card"><div style="display:flex;align-items:center;gap:14px;">'
+    + '<div class="panel"><div style="display:flex;align-items:center;gap:14px;">'
     + badge(code, code, true)
     + '<div><h2 style="margin:0;">'+esc(team.name)+'</h2>'
     + '<div class="sub">'+esc(code)+' · '+esc(team.region)+'</div></div></div></div>'
-    + '<div class="card"><div class="lbl" style="margin-top:0;">陣容對照 2026 → 2027</div>'
+    + '<div class="panel"><div class="lbl" style="margin-top:0;">陣容對照 2026 → 2027</div>'
     + '<table class="roster"><tr><th>位置</th><th>2026</th><th>2027</th><th>狀態</th></tr>'+rows+'</table></div>'
-    + '<div class="region">相關動態</div>' + relHtml;
+    + '<div class="region"><span>相關動態</span></div>' + relHtml;
 }
 
 function transferView(id){
@@ -236,9 +269,9 @@ function transferView(id){
     ? '<a href="'+esc(t.sourceUrl)+'" target="_blank" rel="noopener">'+esc(t.sourceName || "原始連結")+' ↗</a>'
     : esc(t.sourceName || "—");
   return '<a class="back" href="#/">← 返回動態</a>'
-    + '<div class="card"><div style="display:flex;align-items:center;gap:12px;">'
+    + '<div class="panel"><div style="display:flex;align-items:center;gap:12px;">'
     + teamBadge(pt.code, pt.ext)
-    + '<div class="main"><div class="pname" style="font-size:18px;">'+esc(pname(t.playerId))+'</div>'
+    + '<div class="main" style="flex:1;min-width:0;"><div class="pname" style="font-size:18px;">'+esc(pname(t.playerId))+'</div>'
     + '<div class="move">'+esc(moveText(t))+(t.role ? ' · '+esc(t.role) : '')+'</div></div>'
     + '<span class="chip '+st.cls+'">'+st.label+'</span></div>'
     + '<div class="lbl">日期</div><p>'+esc(t.announcedDate || "—")+'</p>'
@@ -268,20 +301,25 @@ function freeAgentList(){
 }
 function freeAgentsView(){
   const list = freeAgentList();
-  const rows = list.map(p =>
-    '<div class="row" style="cursor:default;">'
+  const rows = list.map((p, i) =>
+    '<div class="card static rise"'+delay(i)+'>'
     + teamBadge(p.baseTeam, p.baseTeam)
     + '<div class="main"><div class="pname">'+esc(p.gameId)+'</div>'
     + '<div class="move">'+esc(p.role || "")+' · 原隊 '+esc(p.baseTeam || "—")+'</div></div>'
     + '<span class="chip st-amber">自由球員</span></div>'
   ).join("");
-  return '<div class="region">自由球員（'+list.length+'）</div>' + (rows || '<div class="empty">暫無自由球員</div>');
+  return '<div class="region"><span>自由球員</span><span class="cnt">'+list.length+' 人</span></div>' + (rows || '<div class="empty">暫無自由球員</div>');
 }
 
+function positionPill(){
+  const on = document.querySelector("#tabs a.on");
+  const pill = document.getElementById("tabPill");
+  if(on && pill){ pill.style.left = on.offsetLeft+"px"; pill.style.width = on.offsetWidth+"px"; pill.style.opacity = "1"; }
+}
 function render(){
   const hash = location.hash || "#/";
   const view = document.getElementById("view");
-  const tab = hash.startsWith("#/team") ? "teams" : (hash === "#/" || hash.startsWith("#/transfer") ? "feed" : "teams");
+  const tab = hash.startsWith("#/team") ? "teams" : "feed";
   document.querySelectorAll("#tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
   if(hash === "#/" || hash === "") view.innerHTML = feedView();
   else if(hash === "#/teams") view.innerHTML = teamsView();
@@ -290,6 +328,7 @@ function render(){
   else if(hash.startsWith("#/transfer/")) view.innerHTML = transferView(hash.slice(11));
   else view.innerHTML = feedView();
   window.scrollTo(0, 0);
+  requestAnimationFrame(positionPill);
 }
 
 fetch("data.json").then(r => r.json()).then(d => {
@@ -305,6 +344,7 @@ fetch("data.json").then(r => r.json()).then(d => {
     + '<span class="stat act" data-f="teams" onclick="location.hash=\'#/teams\'">監控戰隊 <b>'+d.teams.length+'</b></span>'
     + '<span class="stat">最後更新 <b>'+esc(upd)+'</b></span>';
   window.addEventListener("hashchange", render);
+  window.addEventListener("resize", positionPill);
   render();
 }).catch(() => {
   document.getElementById("view").innerHTML = '<div class="empty">資料載入失敗，請稍後再試。</div>';
