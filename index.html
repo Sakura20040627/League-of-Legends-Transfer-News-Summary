@@ -174,14 +174,19 @@ function teamView(code){
   const starters = {};
   DATA.slots.filter(s => s.teamCode===code && s.season===2026 && !s.isSubstitute)
     .forEach(s => { starters[s.role] = s.playerId; });
+  const s27 = {};
+  DATA.slots.filter(s => s.teamCode===code && s.season===2027 && !s.isSubstitute && s.playerId != null)
+    .forEach(s => { s27[s.role] = s.playerId; });
   let rows = "";
   for(const role of ROLES){
     const o = DATA.slotOutlooks.find(x => x.teamCode===code && x.role===role);
     const kind = o ? o.kind : "none";
-    const meta = OUTLOOK[kind] || OUTLOOK.none;
+    let meta = OUTLOOK[kind] || OUTLOOK.none;
+    if(kind === "none" && s27[role] != null) meta = {label:"已確認", cls:"st-green"};
     const inc = starters[role];
     let next = null;
     if(o && o.incomingPlayerId) next = o.incomingPlayerId;
+    else if(s27[role] != null) next = s27[role];
     else if(o && o.showIncumbent) next = inc;
     else if(o && (kind==="departed" || kind==="leaving_reported" || kind==="leaving_rumor")) next = inc;
     const nextHtml = next == null ? '<span style="color:var(--grey)">—</span>'
