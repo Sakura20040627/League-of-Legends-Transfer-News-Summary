@@ -55,8 +55,14 @@
   .card p{font-size:14.5px; line-height:1.75; color:#D5D9DE; white-space:pre-wrap;}
   .card .lbl{font-size:12px; color:var(--grey); letter-spacing:.1em; margin:14px 0 4px;}
   .back{display:inline-block; margin-bottom:14px; font-size:14px;}
-  table.roster{width:100%; border-collapse:collapse; font-size:14px;}
-  table.roster th, table.roster td{padding:9px 8px; border-bottom:1px solid var(--border); text-align:left; vertical-align:middle;}
+  table.roster{width:100%; border-collapse:collapse; font-size:13px; table-layout:fixed;}
+  table.roster th, table.roster td{padding:9px 6px; border-bottom:1px solid var(--border); text-align:left; vertical-align:middle;}
+  table.roster th:nth-child(1), table.roster td:nth-child(1){width:19%;}
+  table.roster th:nth-child(2), table.roster td:nth-child(2){width:26%;}
+  table.roster th:nth-child(3), table.roster td:nth-child(3){width:26%;}
+  table.roster th:nth-child(4), table.roster td:nth-child(4){width:29%;}
+  table.roster td{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  table.roster .chip{font-size:11px; padding:2px 7px;}
   table.roster th{color:var(--grey); font-size:12px; letter-spacing:.08em; font-weight:600;}
   table.roster tr:last-child td{border-bottom:none;}
   .role{color:var(--muted); font-size:12.5px; font-weight:600; letter-spacing:.05em; white-space:nowrap;}
