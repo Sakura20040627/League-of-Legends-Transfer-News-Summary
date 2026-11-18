@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>英雄聯盟轉會追蹤｜公開鏡像</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0D10; --surface:#14171C; --surface2:#1A1E24; --border:#292D34;
+    --text:#E8EAED; --muted:#9AA3AD; --accent:#83B3DA;
+    --green:#86C9A4; --amber:#D3AF72; --red:#E08A8A; --grey:#7A828B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--text); font-family:Inter,"Noto Sans SC",system-ui,sans-serif; -webkit-font-smoothing:antialiased;}
+  a{color:var(--accent); text-decoration:none;}
+  .wrap{max-width:860px; margin:0 auto; padding:20px 16px 64px;}
+  header.top{padding:8px 0 16px; border-bottom:1px solid var(--border); margin-bottom:16px;}
+  h1{font-size:22px; font-weight:700; letter-spacing:.02em;}
+  .sub{color:var(--muted); font-size:13px; margin-top:4px;}
+  .stats{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+  .stat{background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-size:12.5px; color:var(--muted);}
+  .stat b{color:var(--text); font-weight:600;}
+  nav.tabs{display:flex; gap:8px; margin:16px 0;}
+  nav.tabs a{padding:8px 18px; border-radius:999px; border:1px solid var(--border); color:var(--muted); font-size:14px; font-weight:500;}
+  nav.tabs a.on{background:var(--accent); border-color:var(--accent); color:#0B0D10; font-weight:600;}
+  .row{display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:8px; cursor:pointer;}
+  .row:hover{background:var(--surface2);}
+  .row .main{flex:1; min-width:0;}
+  .pname{font-size:15.5px; font-weight:600;}
+  .move{color:var(--muted); font-size:13px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .date{color:var(--grey); font-size:12px; white-space:nowrap;}
+  .badge{position:relative; width:40px; height:40px; flex:0 0 40px; border-radius:9px; background:#E9EBEE; color:#33383F; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; overflow:hidden;}
+  .badge img{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:3px;}
+  .badge.lg{width:56px; height:56px; flex-basis:56px; font-size:14px; border-radius:12px;}
+  .chip{display:inline-block; padding:2.5px 9px; border-radius:999px; font-size:11.5px; font-weight:600; white-space:nowrap; border:1px solid transparent;}
+  .st-green{color:var(--green); border-color:rgba(134,201,164,.4); background:rgba(134,201,164,.08);}
+  .st-amber{color:var(--amber); border-color:rgba(211,175,114,.4); background:rgba(211,175,114,.08);}
+  .st-red{color:var(--red); border-color:rgba(224,138,138,.4); background:rgba(224,138,138,.08);}
+  .st-blue{color:var(--accent); border-color:rgba(131,179,218,.4); background:rgba(131,179,218,.08);}
+  .st-grey{color:var(--grey); border-color:rgba(122,130,139,.35); background:rgba(122,130,139,.07);}
+  .region{font-size:13px; font-weight:700; color:var(--muted); letter-spacing:.14em; margin:20px 0 8px;}
+  .region:first-child{margin-top:4px;}
+  .tname{font-size:15px; font-weight:600;}
+  .tcode{color:var(--grey); font-size:12px; margin-left:6px;}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px;}
+  .card h2{font-size:17px; margin-bottom:6px;}
+  .card p{font-size:14.5px; line-height:1.75; color:#D5D9DE; white-space:pre-wrap;}
+  .card .lbl{font-size:12px; color:var(--grey); letter-spacing:.1em; margin:14px 0 4px;}
+  .back{display:inline-block; margin-bottom:14px; font-size:14px;}
+  table.roster{width:100%; border-collapse:collapse; font-size:14px;}
+  table.roster th, table.roster td{padding:9px 8px; border-bottom:1px solid var(--border); text-align:left; vertical-align:middle;}
+  table.roster th{color:var(--grey); font-size:12px; letter-spacing:.08em; font-weight:600;}
+  table.roster tr:last-child td{border-bottom:none;}
+  .role{color:var(--muted); font-size:12.5px; font-weight:600; letter-spacing:.05em; white-space:nowrap;}
+  tr.sub td{opacity:.62; font-size:13px;}
+  .tag-sub{font-size:10.5px; border:1px solid var(--border); border-radius:4px; padding:1px 5px; color:var(--muted); margin-left:6px;}
+  .gone{color:var(--red);}
+  footer{color:var(--grey); font-size:12px; line-height:1.7; margin-top:28px; border-top:1px solid var(--border); padding-top:14px;}
+  .empty{color:var(--muted); padding:32px 0; text-align:center; font-size:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>英雄聯盟轉會追蹤</h1>
+    <div class="sub">2026–27 賽季 · LPL / LCK / LEC / LCP / LCS · 公開只讀鏡像</div>
+    <div class="stats" id="stats"></div>
+  </header>
+  <nav class="tabs" id="tabs">
+    <a href="#/" data-tab="feed">動態</a>
+    <a href="#/teams" data-tab="teams">戰隊</a>
+  </nav>
+  <main id="view"><div class="empty">載入中…</div></main>
+  <footer>本頁為轉會追蹤的公開只讀鏡像，由系統自動同步產生。內容彙整自各戰隊官方公告與媒體報道；標示為「傳聞」者未經官方證實，請以官方公告為準。</footer>
+</div>
+<script src="logos.js"></script>
+<script>
+"use strict";
+let DATA = null;
+const P = {};   // playerId -> player
+const T = {};   // code -> team
+const ROLES = ["TOP","JUNGLE","MID","ADC","SUPPORT"];
+const REGION_ORDER = ["LPL","LCK","LEC","LCP","LCS"];
+
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function pname(id){ const p = P[id]; return p ? p.gameId : "—"; }
+function badge(code, label, lg){
+  const text = esc(label || code || "?");
+  const src = code ? ((window.TEAM_LOGOS && window.TEAM_LOGOS[code]) || ('logos/'+esc(code)+'.png')) : "";
+  const img = code ? '<img src="'+src+'" alt="" loading="lazy" onerror="this.remove()">' : "";
+  return '<span class="badge'+(lg?" lg":"")+'">'+text+img+'</span>';
+}
+function teamBadge(code, ext, lg){
+  if(code && T[code]) return badge(code, code, lg);
+  return badge(null, (ext||code||"?").slice(0,4), lg);
+}
+function transferStatus(t){
+  if(t.credStatus==="REFUTED" || t.outcome==="debunked") return {label:"已證偽", cls:"st-red"};
+  if(t.credStatus==="OFFICIAL") return {label:"官方確認", cls:"st-green"};
+  if(t.outcome==="confirmed") return {label:"已確認", cls:"st-green"};
+  if(t.credStatus==="REPORTED" || t.tier==="REPORTED") return {label:"媒體報道", cls:"st-blue"};
+  if(t.credStatus==="RUMOR" || t.tier==="RUMOR") return {label:"傳聞", cls:"st-amber"};
+  if(t.outcome==="unverifiable") return {label:"無法核實", cls:"st-grey"};
+  return {label:"待核實", cls:"st-grey"};
+}
+function moveText(t){
+  const from = t.fromTeam || t.fromTeamExt || "";
+  const to = t.toTeam || t.toTeamExt || "";
+  if(t.moveType==="join") return (from ? from+" → " : "") + to + "｜加盟";
+  if(t.moveType==="leave") return "離開 " + from;
+  if(t.moveType==="renew") return "續約 " + (to || from);
+  if(t.moveType==="free_agent") return (from ? "離開 "+from+"｜" : "") + "成為自由球員";
+  return (from || "") + (to ? " → "+to : "");
+}
+function primaryTeam(t){ return t.toTeam ? {code:t.toTeam} : {code:t.fromTeam, ext:t.fromTeamExt}; }
+
+function feedView(){
+  const rows = DATA.transfers.map(t => {
+    const st = transferStatus(t), pt = primaryTeam(t);
+    return '<div class="row" onclick="location.hash=\'#/transfer/'+t.id+'\'">'
+      + teamBadge(pt.code, pt.ext)
+      + '<div class="main"><div class="pname">'+esc(pname(t.playerId))+'</div>'
+      + '<div class="move">'+esc(moveText(t))+'</div></div>'
+      + '<span class="chip '+st.cls+'">'+st.label+'</span>'
+      + '<span class="date">'+esc(t.announcedDate || "")+'</span></div>';
+  }).join("");
+  return rows || '<div class="empty">暫無記錄</div>';
+}
+
+function teamsView(){
+  let html = "";
+  for(const region of REGION_ORDER){
+    const teams = DATA.teams.filter(t => t.region === region);
+    if(!teams.length) continue;
+    html += '<div class="region">'+region+'</div>';
+    html += teams.map(t =>
+      '<div class="row" onclick="location.hash=\'#/team/'+t.code+'\'">'
+      + badge(t.code, t.code)
+      + '<div class="main"><span class="tname">'+esc(t.name)+'</span><span class="tcode">'+esc(t.code)+'</span></div>'
+      + '<span class="date">'+region+'</span></div>'
+    ).join("");
+  }
+  return html;
+}
+
+const OUTLOOK = {
+  contract_active:{label:"已確認", cls:"st-green"},
+  renewed:{label:"已確認 · 續約", cls:"st-green"},
+  announced:{label:"已官宣", cls:"st-green"},
+  incoming_rumor:{label:"傳聞加盟", cls:"st-amber"},
+  departed:{label:"已確認離隊", cls:"st-red"},
+  leaving_reported:{label:"疑似離隊", cls:"st-amber"},
+  leaving_rumor:{label:"疑似離隊", cls:"st-amber"},
+  unverified:{label:"未確認", cls:"st-grey"},
+  none:{label:"空缺", cls:"st-grey"}
+};
+
+function teamView(code){
+  const team = T[code];
+  if(!team) return '<div class="empty">找不到這支戰隊</div>';
+  const starters = {};
+  DATA.slots.filter(s => s.teamCode===code && s.season===2026 && !s.isSubstitute)
+    .forEach(s => { starters[s.role] = s.playerId; });
+  let rows = "";
+  for(const role of ROLES){
+    const o = DATA.slotOutlooks.find(x => x.teamCode===code && x.role===role);
+    const kind = o ? o.kind : "none";
+    const meta = OUTLOOK[kind] || OUTLOOK.none;
+    const inc = starters[role];
+    let next = null;
+    if(o && o.incomingPlayerId) next = o.incomingPlayerId;
+    else if(o && o.showIncumbent) next = inc;
+    else if(o && (kind==="departed" || kind==="leaving_reported" || kind==="leaving_rumor")) next = inc;
+    const nextHtml = next == null ? '<span style="color:var(--grey)">—</span>'
+      : '<span class="'+(kind==="departed" ? "gone" : "")+'">'+esc(pname(next))+'</span>';
+    rows += '<tr><td class="role">'+role+'</td><td>'+esc(inc==null?"—":pname(inc))+'</td><td>'+nextHtml+'</td>'
+      + '<td><span class="chip '+meta.cls+'">'+meta.label+'</span></td></tr>';
+  }
+  const subs = DATA.slots.filter(s => s.teamCode===code && s.season===2026 && s.isSubstitute);
+  for(const s of subs){
+    const o = DATA.subOutlooks.find(x => x.teamCode===code && x.playerId===s.playerId);
+    const meta = OUTLOOK[o ? o.kind : "unverified"] || OUTLOOK.unverified;
+    rows += '<tr class="sub"><td class="role">'+s.role+'</td><td>'+esc(pname(s.playerId))
+      + '<span class="tag-sub">替補</span></td><td>'+esc(pname(s.playerId))+'</td>'
+      + '<td><span class="chip '+meta.cls+'">'+meta.label+'</span></td></tr>';
+  }
+  const rel = DATA.transfers.filter(t => t.fromTeam===code || t.toTeam===code);
+  const relHtml = rel.length ? rel.map(t => {
+    const st = transferStatus(t), pt = primaryTeam(t);
+    return '<div class="row" onclick="location.hash=\'#/transfer/'+t.id+'\'">'
+      + teamBadge(pt.code, pt.ext)
+      + '<div class="main"><div class="pname">'+esc(pname(t.playerId))+'</div>'
+      + '<div class="move">'+esc(moveText(t))+'</div></div>'
+      + '<span class="chip '+st.cls+'">'+st.label+'</span>'
+      + '<span class="date">'+esc(t.announcedDate || "")+'</span></div>';
+  }).join("") : '<div class="empty">暫無相關記錄</div>';
+  return '<a class="back" href="#/teams">← 返回戰隊列表</a>'
+    + '<div class="card"><div style="display:flex;align-items:center;gap:14px;">'
+    + badge(code, code, true)
+    + '<div><h2 style="margin:0;">'+esc(team.name)+'</h2>'
+    + '<div class="sub">'+esc(code)+' · '+esc(team.region)+'</div></div></div></div>'
+    + '<div class="card"><div class="lbl" style="margin-top:0;">陣容對照 2026 → 2027</div>'
+    + '<table class="roster"><tr><th>位置</th><th>2026</th><th>2027</th><th>狀態</th></tr>'+rows+'</table></div>'
+    + '<div class="region">相關動態</div>' + relHtml;
+}
+
+function transferView(id){
+  const t = DATA.transfers.find(x => x.id === Number(id));
+  if(!t) return '<div class="empty">找不到這條記錄</div>';
+  const st = transferStatus(t), pt = primaryTeam(t);
+  const src = t.sourceUrl
+    ? '<a href="'+esc(t.sourceUrl)+'" target="_blank" rel="noopener">'+esc(t.sourceName || "原始連結")+' ↗</a>'
+    : esc(t.sourceName || "—");
+  return '<a class="back" href="#/">← 返回動態</a>'
+    + '<div class="card"><div style="display:flex;align-items:center;gap:12px;">'
+    + teamBadge(pt.code, pt.ext)
+    + '<div class="main"><div class="pname" style="font-size:18px;">'+esc(pname(t.playerId))+'</div>'
+    + '<div class="move">'+esc(moveText(t))+(t.role ? ' · '+esc(t.role) : '')+'</div></div>'
+    + '<span class="chip '+st.cls+'">'+st.label+'</span></div>'
+    + '<div class="lbl">日期</div><p>'+esc(t.announcedDate || "—")+'</p>'
+    + '<div class="lbl">內容</div><p>'+esc(t.content || "—")+'</p>'
+    + (t.corroboration ? '<div class="lbl">佐證</div><p>'+esc(t.corroboration)+'</p>' : "")
+    + '<div class="lbl">來源</div><p>'+src+'</p></div>';
+}
+
+function render(){
+  const hash = location.hash || "#/";
+  const view = document.getElementById("view");
+  const tab = hash.startsWith("#/team") ? "teams" : (hash === "#/" || hash.startsWith("#/transfer") ? "feed" : "teams");
+  document.querySelectorAll("#tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
+  if(hash === "#/" || hash === "") view.innerHTML = feedView();
+  else if(hash === "#/teams") view.innerHTML = teamsView();
+  else if(hash.startsWith("#/team/")) view.innerHTML = teamView(hash.slice(7));
+  else if(hash.startsWith("#/transfer/")) view.innerHTML = transferView(hash.slice(11));
+  else view.innerHTML = feedView();
+  window.scrollTo(0, 0);
+}
+
+fetch("data.json").then(r => r.json()).then(d => {
+  DATA = d;
+  d.players.forEach(p => { P[p.id] = p; });
+  d.teams.forEach(t => { T[t.code] = t; });
+  const s = d.stats || {};
+  const upd = s.lastUpdated ? new Date(s.lastUpdated).toLocaleString("zh-TW", {timeZone:"Asia/Tokyo", hour12:false}) : "—";
+  document.getElementById("stats").innerHTML =
+    '<span class="stat">已確認 <b>'+(s.confirmedCount ?? "—")+'</b></span>'
+    + '<span class="stat">傳聞 <b>'+(s.rumorCount ?? "—")+'</b></span>'
+    + '<span class="stat">自由球員 <b>'+(s.freeAgentCount ?? "—")+'</b></span>'
+    + '<span class="stat">監控戰隊 <b>'+d.teams.length+'</b></span>'
+    + '<span class="stat">最後更新 <b>'+esc(upd)+'</b></span>';
+  window.addEventListener("hashchange", render);
+  render();
+}).catch(() => {
+  document.getElementById("view").innerHTML = '<div class="empty">資料載入失敗，請稍後再試。</div>';
+});
+</script>
+</body>
+</html>
