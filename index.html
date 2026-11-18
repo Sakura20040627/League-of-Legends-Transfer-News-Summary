@@ -33,6 +33,7 @@
   .date{color:var(--grey); font-size:12px; white-space:nowrap;}
   .badge{position:relative; width:40px; height:40px; flex:0 0 40px; border-radius:9px; background:#E9EBEE; color:#33383F; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; overflow:hidden;}
   .badge img{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:3px;}
+  .badge:has(> img) .txt{display:none;}
   .badge.lg{width:56px; height:56px; flex-basis:56px; font-size:14px; border-radius:12px;}
   .chip{display:inline-block; padding:2.5px 9px; border-radius:999px; font-size:11.5px; font-weight:600; white-space:nowrap; border:1px solid transparent;}
   .st-green{color:var(--green); border-color:rgba(134,201,164,.4); background:rgba(134,201,164,.08);}
@@ -90,7 +91,7 @@ function badge(code, label, lg){
   const text = esc(label || code || "?");
   const src = code ? ((window.TEAM_LOGOS && window.TEAM_LOGOS[code]) || ('logos/'+esc(code)+'.png')) : "";
   const img = code ? '<img src="'+src+'" alt="" loading="lazy" onerror="this.remove()">' : "";
-  return '<span class="badge'+(lg?" lg":"")+'">'+text+img+'</span>';
+  return '<span class="badge'+(lg?" lg":"")+'"><span class="txt">'+text+'</span>'+img+'</span>';
 }
 function teamBadge(code, ext, lg){
   if(code && T[code]) return badge(code, code, lg);
