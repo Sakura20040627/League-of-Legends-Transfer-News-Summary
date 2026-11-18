@@ -22,6 +22,11 @@
   .stats{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
   .stat{background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-size:12.5px; color:var(--muted);}
   .stat b{color:var(--text); font-weight:600;}
+  .stat.act{cursor:pointer;}
+  .stat.act:hover{border-color:var(--accent);}
+  .stat.act.on{border-color:var(--accent); color:var(--text);}
+  .filterbar{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px; color:var(--muted);}
+  .filterbar a{cursor:pointer;}
   nav.tabs{display:flex; gap:8px; margin:16px 0;}
   nav.tabs a{padding:8px 18px; border-radius:999px; border:1px solid var(--border); color:var(--muted); font-size:14px; font-weight:500;}
   nav.tabs a.on{background:var(--accent); border-color:var(--accent); color:#0B0D10; font-weight:600;}
@@ -80,6 +85,7 @@
 <script>
 "use strict";
 let DATA = null;
+let feedFilter = "all";
 const P = {};   // playerId -> player
 const T = {};   // code -> team
 const ROLES = ["TOP","JUNGLE","MID","ADC","SUPPORT"];
@@ -118,7 +124,11 @@ function moveText(t){
 function primaryTeam(t){ return t.toTeam ? {code:t.toTeam} : {code:t.fromTeam, ext:t.fromTeamExt}; }
 
 function feedView(){
-  const rows = DATA.transfers.map(t => {
+  let list = DATA.transfers;
+  if(feedFilter === "confirmed") list = list.filter(t => transferStatus(t).cls === "st-green");
+  else if(feedFilter === "rumor") list = list.filter(t => transferStatus(t).cls !== "st-green");
+  const bar = feedFilter === "all" ? "" : '<div class="filterbar"><span>篩選：'+(feedFilter === "confirmed" ? "已確認" : "傳聞")+'（'+list.length+' 條）</span><a onclick="clearFilter()">✕ 顯示全部</a></div>';
+  const rows = list.map(t => {
     const st = transferStatus(t), pt = primaryTeam(t);
     return '<div class="row" onclick="location.hash=\'#/transfer/'+t.id+'\'">'
       + teamBadge(pt.code, pt.ext)
@@ -127,7 +137,7 @@ function feedView(){
       + '<span class="chip '+st.cls+'">'+st.label+'</span>'
       + '<span class="date">'+esc(t.announcedDate || "")+'</span></div>';
   }).join("");
-  return rows || '<div class="empty">暫無記錄</div>';
+  return bar + (rows || '<div class="empty">暫無記錄</div>');
 }
 
 function teamsView(){
@@ -226,6 +236,30 @@ function transferView(id){
     + '<div class="lbl">來源</div><p>'+src+'</p></div>';
 }
 
+function setFilter(f){
+  feedFilter = f;
+  if(location.hash === "#/" || location.hash === "" || location.hash.startsWith("#/transfer")){ location.hash = "#/"; render(); }
+  else location.hash = "#/";
+  markStats();
+}
+function clearFilter(){ feedFilter = "all"; render(); markStats(); }
+function markStats(){
+  document.querySelectorAll("#stats .stat.act").forEach(el => {
+    el.classList.toggle("on", el.dataset.f === feedFilter);
+  });
+}
+function freeAgentsView(){
+  const list = DATA.players.filter(p => p.status === "free_agent");
+  const rows = list.map(p =>
+    '<div class="row" style="cursor:default;">'
+    + teamBadge(p.baseTeam, p.baseTeam)
+    + '<div class="main"><div class="pname">'+esc(p.gameId)+'</div>'
+    + '<div class="move">'+esc(p.role || "")+' · 原隊 '+esc(p.baseTeam || "—")+'</div></div>'
+    + '<span class="chip st-amber">自由球員</span></div>'
+  ).join("");
+  return '<div class="region">自由球員（'+list.length+'）</div>' + (rows || '<div class="empty">暫無自由球員</div>');
+}
+
 function render(){
   const hash = location.hash || "#/";
   const view = document.getElementById("view");
@@ -233,6 +267,7 @@ function render(){
   document.querySelectorAll("#tabs a").forEach(a => a.classList.toggle("on", a.dataset.tab === tab));
   if(hash === "#/" || hash === "") view.innerHTML = feedView();
   else if(hash === "#/teams") view.innerHTML = teamsView();
+  else if(hash === "#/freeagents") view.innerHTML = freeAgentsView();
   else if(hash.startsWith("#/team/")) view.innerHTML = teamView(hash.slice(7));
   else if(hash.startsWith("#/transfer/")) view.innerHTML = transferView(hash.slice(11));
   else view.innerHTML = feedView();
@@ -246,10 +281,10 @@ fetch("data.json").then(r => r.json()).then(d => {
   const s = d.stats || {};
   const upd = s.lastUpdated ? new Date(s.lastUpdated).toLocaleString("zh-TW", {timeZone:"Asia/Tokyo", hour12:false}) : "—";
   document.getElementById("stats").innerHTML =
-    '<span class="stat">已確認 <b>'+(s.confirmedCount ?? "—")+'</b></span>'
-    + '<span class="stat">傳聞 <b>'+(s.rumorCount ?? "—")+'</b></span>'
-    + '<span class="stat">自由球員 <b>'+(s.freeAgentCount ?? "—")+'</b></span>'
-    + '<span class="stat">監控戰隊 <b>'+d.teams.length+'</b></span>'
+    '<span class="stat act" data-f="confirmed" onclick="setFilter(\'confirmed\')">已確認 <b>'+(s.confirmedCount ?? "—")+'</b></span>'
+    + '<span class="stat act" data-f="rumor" onclick="setFilter(\'rumor\')">傳聞 <b>'+(s.rumorCount ?? "—")+'</b></span>'
+    + '<span class="stat act" data-f="fa" onclick="location.hash=\'#/freeagents\'">自由球員 <b>'+(s.freeAgentCount ?? "—")+'</b></span>'
+    + '<span class="stat act" data-f="teams" onclick="location.hash=\'#/teams\'">監控戰隊 <b>'+d.teams.length+'</b></span>'
     + '<span class="stat">最後更新 <b>'+esc(upd)+'</b></span>';
   window.addEventListener("hashchange", render);
   render();
